@@ -10,15 +10,24 @@ public class Solution {
 	
 	private String word1;
 	private String word2;
+	private String words;
 	private String target;
+	private String sign;
 	private int max_score = 0;
 	private String max_solution;
 	private Random rand = new Random();
+	private Utils util = new Utils();
 	
 	public Solution(String word1, String word2, String target){
+		this(word1 ,word2 ,target ,"+");
+	}
+	
+	public Solution(String word1, String word2, String target, String sign){
 		this.word1 = word1;
 		this.word2 = word2;
 		this.target = target;
+		this.sign = sign;
+		this.words = word1 + word2;
 	}
 	
 	public String[] initSolutions(String[] solutions_arr){
@@ -28,12 +37,15 @@ public class Solution {
 	}
 	
 	public String generate(){
-		String possible_sol = this.word1 + this.word2;
+		String possible_sol = words;
 		String numbers = "0123456789";
 		Random rand = new Random();
 		for(int i = 0; i < possible_sol.length(); i++)
 		{
 			int rnd = rand.nextInt(numbers.length());
+			if (i == 0)
+				rnd = rand.nextInt(numbers.length() - 1) + 1;
+			
 			if (!(Utils.isNumeric(possible_sol.charAt(i))))
 			{
 				possible_sol = possible_sol.replace(possible_sol.charAt(i), numbers.charAt(rnd));
@@ -69,7 +81,7 @@ public class Solution {
 	
 	public int fitness(String sol){
 		int score = 0;
-		String calc_result = calcEquation(sol,"+");
+		String calc_result = calcEquation(sol);
 		String opt_sol = wordToNum(sol);
 		int min_len =  Math.min(opt_sol.length(), calc_result.length());
 		for(int i=0; i<min_len; i++){
@@ -80,26 +92,23 @@ public class Solution {
 		
 		double same_char_score = (double)score/(double)sameCharsNum();
 		double len_score = (double)(opt_sol.length()-Utils.dist(opt_sol, target))/(double)opt_sol.length();
-		int total_score = (int)((0.5*same_char_score + 0.5*len_score) * 100);
+		int total_score = (int)((0.8*same_char_score + 0.2*len_score) * 100);
 		return total_score;
 	}
 	
 	public String numToWord(String num_map, String target){
-		String src = target;
-		String letter_map = this.word1 + this.word2;
 		for(int i=0;i<target.length();i++){
 			int indx = num_map.indexOf(target.charAt(i));
 			if (indx > -1)
-				src = src.replace(target.charAt(i), letter_map.charAt(indx));
+				target = target.replace(target.charAt(i), words.charAt(indx));
 		}
-		return src;
+		return target;
 	}
 	
 	public String wordToNum(String num_map){
 		String src = target;
-		String letter_map = this.word1 + this.word2;
 		for(int i=0;i<target.length();i++){
-			int indx = letter_map.indexOf(target.charAt(i));
+			int indx = words.indexOf(target.charAt(i));
 			if (indx > -1)
 				src = src.replace(target.charAt(i), num_map.charAt(indx));
 		}
@@ -107,24 +116,40 @@ public class Solution {
 	}
 	
 	public boolean isValid(String sol){
-		String num_target = wordToNum(sol);
-		String comp = calcEquation(sol, "+");
-		if (comp.length() != num_target.length())
+		String result = calcEquation(sol);
+		String target_comp = numToWord(sol, result);
+		if (target_comp.length() != target.length())
 			return false;
 		
-		for(int i = 0;i<comp.length();i++){
-			if (Utils.isNumeric(num_target.charAt(i))){
-				if (comp.charAt(i) != num_target.charAt(i)) return false;
+		int same_char_count=0;
+		for(int i = 0;i<target_comp.length();i++){
+			if (!Utils.isNumeric(target_comp.charAt(i))){
+				if (target_comp.charAt(i) == target.charAt(i)) {
+					same_char_count++;
+				}else{
+					return false;
+				}
 			}
 		}
 		
-		return true;
+		if (same_char_count == sameCharsNum())
+			return true;
+		return false;
 	}
 	
-	private String calcEquation(String eq, String sign){
+	private String calcEquation(String eq){
 		int num1 = Integer.parseInt(eq.substring(0, word1.length()));
 		int num2 = Integer.parseInt(eq.substring(word1.length(), eq.length()));
-		int result = num1 + num2;
+		int result;
+		if (sign == "*"){
+			result = num1 + num2;
+		} else if (sign == "-"){
+			result = num1 - num2;
+		} else if (sign == "/"){
+			result = num1 / num2;
+		} else{
+			result = num1 + num2;
+		}
 		return Integer.toString(result);
 	}
 	
@@ -137,27 +162,39 @@ public class Solution {
 	}
 	
 	public String revalidate(String num){
-		String letter = this.word1 + this.word2;
-		Map<Character,Character> map = new HashMap<Character,Character>(); 
+		Map<Character,Character> map = getMap(num); 
 		String valid_str = "";
-		for(int i=0;i<letter.length();i++){
-			if (!map.containsValue(num.charAt(i)))
-				map.put(letter.charAt(i),num.charAt(i));
-		}
-		for(int i=0;i<letter.length();i++){
-			if (!map.containsKey(letter.charAt(i))){
+
+		for(int i=0;i<words.length();i++){
+			if (!map.containsKey(words.charAt(i))){
 				char key;
 				do {
 					key = Integer.toString(rand.nextInt(10)).charAt(0);
 				} while (map.containsValue(key));
-				map.put(letter.charAt(i),key);
+				map.put(words.charAt(i),key);
 			}
 		}
 		
-		for(int i=0;i<letter.length();i++){
-			valid_str = valid_str + map.get(letter.charAt(i));
+		for(int i=0;i<words.length();i++){
+			valid_str = valid_str + map.get(words.charAt(i));
 		}
+		
+		while (valid_str.charAt(0) == '0'){
+			char char1 = util.getRandomChar(valid_str);
+			valid_str = util.swap(valid_str, '0', char1);
+		}
+			
 		return valid_str;
+	}
+	
+	public Map<Character,Character> getMap(String str_num){
+		Map<Character,Character> map = new HashMap<Character,Character>(); 
+		for(int i=0;i<words.length();i++){
+			if (!map.containsValue(str_num.charAt(i)))
+				map.put(words.charAt(i),str_num.charAt(i));
+		}
+		return map;
+		
 	}
 	
 	
@@ -196,21 +233,21 @@ public class Solution {
 					tmp_arr.add(key);
 			}
 			System.out.println("tmp_arr size=" + tmp_arr.size());
-			for(int i=1;i<80;i++){
-				solutions[0] = max_solution;
-				int rnd = rand.nextInt(10);
-				if (rnd < 2)
-					solutions[i] = mutate(solutions[i]);
+			solutions[0] = max_solution;
+			for(int i=1;i<100;i++){
+				int rnd = rand.nextInt(100);
+				if (rnd < 15){
+					solutions[i] = generate();
+				}
 				else {
 					String str1 = (String) Utils.rand(tmp_arr);
 					String str2 = (String) Utils.rand(tmp_arr);
 					solutions[i] = revalidate(crossOver(str1, str2));
 				}
-			}
-			
-			for(int i=80;i<100;i++)
-				solutions[i] = generate();
-
+				if (rand.nextInt(100) < 5){
+					solutions[i] = mutate(solutions[i]);
+				}
+			}				
 		}
 		return str;
 	}
@@ -224,24 +261,24 @@ public class Solution {
 	
 	private int sameCharsNum(){
 		int same = 0;
-		String str = this.word1 + this.word2;
 		for(int i=0;i<target.length();i++)
-			if (str.contains(target.substring(i, i+1))){
+			if (words.contains(target.substring(i, i+1))){
 				same++;
 			}
-		
 		
 		return same;
 	}
 	
 	private String mutate(String str){
-		char char1;
-		char char2;
-		do {
-			char1 = str.charAt(rand.nextInt(str.length()));
-			char2 = str.charAt(rand.nextInt(str.length()));
-		} while (char1 == char2);
-		return  str.replace(char1, '-').replace(char2, '+').replace('-', char2).replace('+', char1);
+		String exclud_numbers = util.getExcludeNumbers(str);
+		if (exclud_numbers.length() > 0){
+			char char1 = util.getRandomChar(str);
+			char char2 = util.getRandomChar(exclud_numbers);
+			str = util.swap(str, char1, char2);
+		} else{
+			str = util.swap(str);
+		}
+		return str;
 	}
 	
 	
@@ -249,7 +286,7 @@ public class Solution {
 		String a = "SEND";
 		String b = "MORE";
 		String c = "MONEY";
-		String[] sol_arry = new String[100];
+		String[] sol_arry = new String[180];
 		
 		Solution sol = new Solution(a,b,c);
 		System.out.println(sol.isValid("95671085"));
@@ -257,15 +294,18 @@ public class Solution {
 		//init solutions 
 		sol_arry = sol.initSolutions(sol_arry);
 		
-		sol.solve(sol_arry, 200);
+		sol.solve(sol_arry, 1000);
 		
 		System.out.println("-------");
 		
-		System.out.println(Utils.isNumeric("12B34"));
-		
-		System.out.println(sol.wordToNum("95671085"));
-		System.out.println(sol.getSolution("9567108510652", "SENDMOREMONEY"));
-		System.out.println(sol.fitness("24658734"));
+//		System.out.println(Utils.isNumeric("12B34"));
+		System.out.println(sol.isValid("93471083"));
+//		System.out.println(sol.numToWord("93471083", "MONEY"));
+		System.out.println(sol.isValid("95671085"));
+//		System.out.println(sol.wordToNum("95671085"));
+//		System.out.println(sol.getSolution("9567108510652", "SENDMOREMONEY"));
+
+		System.out.println(sol.fitness("93471083"));
 		System.out.println(sol.fitness("95671085"));
 		
 	}
