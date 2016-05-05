@@ -78,7 +78,7 @@ public class Solution {
 					score++;
 		}
 		
-		double same_char_score = (double)score/(double)sameChars();
+		double same_char_score = (double)score/(double)sameCharsNum();
 		double len_score = (double)(opt_sol.length()-Utils.dist(opt_sol, target))/(double)opt_sol.length();
 		int total_score = (int)((0.5*same_char_score + 0.5*len_score) * 100);
 		return total_score;
@@ -189,13 +189,13 @@ public class Solution {
 			for(int i=0;i<fitness_map.size();i++){
 				String key = solutions[i];
 				int occurence = (int)((double)fitness_map.get(key)/(double)max_score * 100);
-				System.out.println("occurnce="+occurence);
+//				System.out.println("occurnce="+occurence);
 				if (occurence == 0) 
 					occurence = 1;
 				for(int j=0;j<occurence;j++) 
 					tmp_arr.add(key);
 			}
-			
+			System.out.println("tmp_arr size=" + tmp_arr.size());
 			for(int i=1;i<80;i++){
 				solutions[0] = max_solution;
 				int rnd = rand.nextInt(10);
@@ -222,7 +222,7 @@ public class Solution {
 		}
 	}
 	
-	private int sameChars(){
+	private int sameCharsNum(){
 		int same = 0;
 		String str = this.word1 + this.word2;
 		for(int i=0;i<target.length();i++)
@@ -235,16 +235,14 @@ public class Solution {
 	}
 	
 	private String mutate(String str){
-		char one;
-		char second;
+		char char1;
+		char char2;
 		do {
-			one = str.charAt(rand.nextInt(str.length()));
-			second = str.charAt(rand.nextInt(str.length()));
-		} while (one == second);
-		return str.replace(one, second);
+			char1 = str.charAt(rand.nextInt(str.length()));
+			char2 = str.charAt(rand.nextInt(str.length()));
+		} while (char1 == char2);
+		return  str.replace(char1, '-').replace(char2, '+').replace('-', char2).replace('+', char1);
 	}
-	
-	
 	
 	
 	public static void main(String[] args) {
