@@ -153,16 +153,17 @@ public class Solution {
 		return Integer.toString(result);
 	}
 	
-	public Map getSolution(String num, String str){
+	public Map getSolution(String num){
 		Map map = new HashMap(); 
+		String solution = words + this,target;
 		for(int i=0;i<num.length();i++){
-			map.put(str.charAt(i),num.charAt(i));
+			map.put(solution.charAt(i),num.charAt(i));
 		}
 		return map;
 	}
 	
 	public String revalidate(String num){
-		Map<Character,Character> map = getMap(num); 
+		Map<Character,Character> map = getCharMap(num); 
 		String valid_str = "";
 
 		for(int i=0;i<words.length();i++){
@@ -187,7 +188,7 @@ public class Solution {
 		return valid_str;
 	}
 	
-	public Map<Character,Character> getMap(String str_num){
+	public Map<Character,Character> getCharMap(String str_num){
 		Map<Character,Character> map = new HashMap<Character,Character>(); 
 		for(int i=0;i<words.length();i++){
 			if (!map.containsValue(str_num.charAt(i)))
@@ -196,7 +197,6 @@ public class Solution {
 		return map;
 		
 	}
-	
 	
 	public String solve(String[] solutions, int iterations){
 		String str = "";
@@ -304,6 +304,7 @@ public class Solution {
 		System.out.println(sol.isValid("95671085"));
 //		System.out.println(sol.wordToNum("95671085"));
 //		System.out.println(sol.getSolution("9567108510652", "SENDMOREMONEY"));
+		System.out.println(sol.getSolution("9567108510652"));
 
 		System.out.println(sol.fitness("93471083"));
 		System.out.println(sol.fitness("95671085"));
