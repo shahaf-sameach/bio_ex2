@@ -30,12 +30,14 @@ public class Solution {
 		this.words = word1 + word2;
 	}
 	
+	// returns an array with random initial solutions 
 	public String[] initSolutions(String[] solutions_arr){
 		for(int i=0;i<solutions_arr.length;i++)
 			solutions_arr[i] = generate();
 		return solutions_arr;
 	}
 	
+	// return initial valid random solution
 	public String generate(){
 		String possible_sol = words;
 		String numbers = "0123456789";
@@ -56,18 +58,8 @@ public class Solution {
 		return possible_sol;
 	}
 	
-	public String getWord1(){
-		return this.word1;
-	}
-	
-	public String getWord2(){
-		return this.word2;
-	}
-	
-	public String getTarget(){
-		return this.target;
-	}
-	
+	// return a string resulting crossover between two optional solutions (strings)
+	// concat begin of one solution to the end of another
 	public String crossOver(String sol1, String sol2){
 		String str1 = sol1.substring(0,this.word1.length());
 		String str2 = sol2.substring(this.word1.length(),sol2.length());
@@ -79,23 +71,41 @@ public class Solution {
 		return str1 + str2;
 	}
 	
+	//return fitness score of a solution
 	public int fitness(String sol){
-		int score = 0;
-		String calc_result = calcEquation(sol);
 		String opt_sol = wordToNum(sol);
-		int min_len =  Math.min(opt_sol.length(), calc_result.length());
-		for(int i=0; i<min_len; i++){
-			if (Utils.isNumeric(opt_sol.charAt(i)))
-				if (opt_sol.charAt(i) == calc_result.charAt(i)) 
-					score++;
-		}
 		
-		double same_char_score = (double)score/(double)sameCharsNum();
-		double len_score = (double)(opt_sol.length()-Utils.dist(opt_sol, target))/(double)opt_sol.length();
+		//calc score based on similar chars 
+		double same_char_score = similarCharsScore(sol);
+		
+		double len_score = lenScore(opt_sol);
+		
+		//calc score as weighted scores of similar and diff
 		int total_score = (int)((0.8*same_char_score + 0.2*len_score) * 100);
 		return total_score;
 	}
 	
+	//calc score based on similar chars 
+	private double similarCharsScore(String sol){
+		int score = 0;
+		String result = calcEquation(sol);
+		String opt_sol = wordToNum(sol);
+		int min_len =  Math.min(opt_sol.length(), result.length());
+		for(int i=0; i<min_len; i++){
+			if (Utils.isNumeric(opt_sol.charAt(i)))
+				if (opt_sol.charAt(i) == result.charAt(i)) 
+					score++;
+		}
+		
+		return (double)score/(double)sameCharsNum();
+	}
+	
+	//returned score based on length diff between optional solution to target
+	private double lenScore(String sol){
+		return (double)(sol.length()-Utils.dist(sol, target))/(double)sol.length();
+	}
+	
+	//convert string on number to String of letter based on specific map
 	public String numToWord(String num_map, String target){
 		for(int i=0;i<target.length();i++){
 			int indx = num_map.indexOf(target.charAt(i));
@@ -105,6 +115,7 @@ public class Solution {
 		return target;
 	}
 	
+	// returned the target string as number string based on number map
 	public String wordToNum(String num_map){
 		String src = target;
 		for(int i=0;i<target.length();i++){
@@ -115,7 +126,8 @@ public class Solution {
 		return src;
 	}
 	
-	public boolean isValid(String sol){
+	// check if a solution is correct
+	public boolean isCorrect(String sol){
 		String result = calcEquation(sol);
 		String target_comp = numToWord(sol, result);
 		if (target_comp.length() != target.length())
@@ -137,6 +149,7 @@ public class Solution {
 		return false;
 	}
 	
+	//calc the equation result of a possible solution
 	private String calcEquation(String eq){
 		int num1 = Integer.parseInt(eq.substring(0, word1.length()));
 		int num2 = Integer.parseInt(eq.substring(word1.length(), eq.length()));
@@ -153,15 +166,18 @@ public class Solution {
 		return Integer.toString(result);
 	}
 	
+	//return letter-number map of a solution
 	public Map getSolution(String num){
 		Map map = new HashMap(); 
-		String solution = words + this,target;
+		String solution = words + this.target;
+		num = num + calcEquation(num);
 		for(int i=0;i<num.length();i++){
 			map.put(solution.charAt(i),num.charAt(i));
 		}
 		return map;
 	}
 	
+	//convert solution to valid solution 
 	public String revalidate(String num){
 		Map<Character,Character> map = getCharMap(num); 
 		String valid_str = "";
@@ -188,6 +204,7 @@ public class Solution {
 		return valid_str;
 	}
 	
+	//return letter-number map of number string
 	public Map<Character,Character> getCharMap(String str_num){
 		Map<Character,Character> map = new HashMap<Character,Character>(); 
 		for(int i=0;i<words.length();i++){
@@ -198,60 +215,108 @@ public class Solution {
 		
 	}
 	
-	public String solve(String[] solutions, int iterations){
-		String str = "";
-		ArrayList<String> tmp_arr = new ArrayList<String>();
-		Map<String,Integer> fitness_map = new HashMap<String,Integer>(); 
+	public String solve(int solutions_number, int iterations){
+		String[] solutions = new String[solutions_number];
+		Map<String,Integer> fitness_map = new HashMap<String,Integer>();
+		
+		solutions = initSolutions(solutions);
+		
 		for(int k=0;k<iterations;k++){
 			System.out.println("iteration: " + k);
-			tmp_arr.clear();
-			fitness_map.clear();
-			int fitness_sum = 0;
-			int score = 0;
-			String solution;
-			for(int i=0;i<100;i++){
-				solution = solutions[i];
-				if (isValid(solution)){
-					System.out.println("valid solution = " + solution);
-					return solution;
+			
+			//check to see if there is a correct solution
+			for (String sol : solutions){
+				if (isCorrect(sol)){
+					System.out.println("valid solution = " + sol);
+					System.out.println(getSolution(sol));
+					return sol;
 				}
-				score = fitness(solution);
-				saveMaxSolution(solution, score);
-				fitness_sum += score;
-				fitness_map.put(solution, score);	
 			}
+			
+			fitness_map = getFitnessMap(solutions);
+			calcStats(solutions);
 			System.out.println("max=(" + max_solution + "," + max_score + ")");
 			System.out.println(fitness_map.size());
-
-			for(int i=0;i<fitness_map.size();i++){
-				String key = solutions[i];
-				int occurence = (int)((double)fitness_map.get(key)/(double)max_score * 100);
-//				System.out.println("occurnce="+occurence);
-				if (occurence == 0) 
-					occurence = 1;
-				for(int j=0;j<occurence;j++) 
-					tmp_arr.add(key);
-			}
-			System.out.println("tmp_arr size=" + tmp_arr.size());
-			solutions[0] = max_solution;
-			for(int i=1;i<100;i++){
-				int rnd = rand.nextInt(100);
-				if (rnd < 15){
-					solutions[i] = generate();
-				}
-				else {
-					String str1 = (String) Utils.rand(tmp_arr);
-					String str2 = (String) Utils.rand(tmp_arr);
-					solutions[i] = revalidate(crossOver(str1, str2));
-				}
-				if (rand.nextInt(100) < 5){
-					solutions[i] = mutate(solutions[i]);
-				}
-			}				
+			
+			String[] occurnce_array = getOccurnessArray(fitness_map);
+			System.out.println("occurnce_array size=" + occurnce_array.length);
+			
+			solutions = stepGeneration(solutions, occurnce_array);
+				
 		}
-		return str;
+		return "";
 	}
 	
+	private void calcStats(String[] solutions){
+		int[] stats = new int[solutions.length];
+		for(int i = 0;i<solutions.length;i++){
+			stats[i] = fitness(solutions[i]);
+		}
+		
+		System.out.println("max=" + "" + "min=" + "" + "avg=" + "");
+	}
+	
+	//return solution-fitness score map
+	private Map<String,Integer> getFitnessMap(String[] solutions){
+		Map<String,Integer> fitness_map = new HashMap<String,Integer>();
+		
+		String sol;
+		int score = 0;
+		for (int i=0;i<solutions.length;i++){
+			sol = solutions[i];
+			score = fitness(sol);
+			saveMaxSolution(sol, score);
+			fitness_map.put(sol, score);	
+		}
+		
+		return fitness_map;
+	}
+	
+	private String[] stepGeneration(String[] solutions, String[] occurnce){
+		//copy the best solution to the next generation
+		solutions[0] = max_solution;
+		
+		for(int i=1;i<solutions.length;i++){
+			int rnd = rand.nextInt(100);
+			// with 0.15 prob create a new random solution (avoid local minimum)
+			if (rnd < 15){
+				solutions[i] = generate();
+			}
+			else {
+				String str1 = (String) Utils.rand(occurnce);
+				String str2 = (String) Utils.rand(occurnce);
+				solutions[i] = revalidate(crossOver(str1, str2));
+			}
+			
+			//mutate 5% of the new solutions
+			if (rand.nextInt(100) < 5){
+				solutions[i] = mutate(solutions[i]);
+			}
+		}
+		return solutions;
+	}
+	
+	//return occurence array of all solution based on their fitness score
+	private String[] getOccurnessArray(Map<String,Integer> fitness_map){
+		ArrayList<String> tmp_arr = new ArrayList<String>();
+		
+		for (String key : fitness_map.keySet()){
+			int occurence = (int)((double)fitness_map.get(key)/(double)max_score * 100);
+			if (occurence == 0) 
+				occurence = 1;
+			for(int j=0;j<occurence;j++) 
+				tmp_arr.add(key);
+		}
+		
+		String[] tmp_string_arry = new String[tmp_arr.size()];
+		for(int i=0;i<tmp_arr.size();i++){
+			tmp_string_arry[i] = tmp_arr.get(i);
+		}
+		
+		return tmp_string_arry;
+	}
+	
+	//save the solution if it has the max score 
 	public void saveMaxSolution(String solution, int score){
 		if (score >= max_score){
 			max_score = score;
@@ -259,6 +324,7 @@ public class Solution {
 		}
 	}
 	
+	//calc the number of similar chars between the equation upper side to the result
 	private int sameCharsNum(){
 		int same = 0;
 		for(int i=0;i<target.length();i++)
@@ -269,45 +335,28 @@ public class Solution {
 		return same;
 	}
 	
+	//return a mutate string of a solution
 	private String mutate(String str){
-		String exclud_numbers = util.getExcludeNumbers(str);
+		String exclud_numbers = Utils.getExcludeNumbers(str);
 		if (exclud_numbers.length() > 0){
-			char char1 = util.getRandomChar(str);
-			char char2 = util.getRandomChar(exclud_numbers);
-			str = util.swap(str, char1, char2);
+			char char1 = Utils.getRandomChar(str);
+			char char2 = Utils.getRandomChar(exclud_numbers);
+			str = Utils.swap(str, char1, char2);
 		} else{
-			str = util.swap(str);
+			str = Utils.swap(str);
 		}
 		return str;
 	}
-	
 	
 	public static void main(String[] args) {
 		String a = "SEND";
 		String b = "MORE";
 		String c = "MONEY";
-		String[] sol_arry = new String[180];
 		
 		Solution sol = new Solution(a,b,c);
-		System.out.println(sol.isValid("95671085"));
+		System.out.println(sol.isCorrect("95671085"));
 
-		//init solutions 
-		sol_arry = sol.initSolutions(sol_arry);
-		
-		sol.solve(sol_arry, 1000);
-		
-		System.out.println("-------");
-		
-//		System.out.println(Utils.isNumeric("12B34"));
-		System.out.println(sol.isValid("93471083"));
-//		System.out.println(sol.numToWord("93471083", "MONEY"));
-		System.out.println(sol.isValid("95671085"));
-//		System.out.println(sol.wordToNum("95671085"));
-//		System.out.println(sol.getSolution("9567108510652", "SENDMOREMONEY"));
-		System.out.println(sol.getSolution("9567108510652"));
-
-		System.out.println(sol.fitness("93471083"));
-		System.out.println(sol.fitness("95671085"));
+		sol.solve(200, 1000);
 		
 	}
 
