@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 
 public class Problem {
@@ -235,11 +236,11 @@ public class Problem {
 			
 			fitness_map = getFitnessMap(solutions);
 			calcStats(solutions);
-			System.out.println("max=(" + max_solution + "," + max_score + ")");
-			System.out.println(fitness_map.size());
+//			System.out.println("max=(" + max_solution + "," + max_score + ")");
+//			System.out.println(fitness_map.size());
 			
 			String[] occurnce_array = getOccurnessArray(fitness_map);
-			System.out.println("occurnce_array size=" + occurnce_array.length);
+//			System.out.println("occurnce_array size=" + occurnce_array.length);
 			
 			solutions = stepGeneration(solutions, occurnce_array);
 				
@@ -252,9 +253,9 @@ public class Problem {
 		for(int i = 0;i<solutions.length;i++){
 			stats[i] = fitness(solutions[i]);
 		}
-		int max = 0;
-		int min = 0;
-		int avg = 0;
+		int max = Utils.max(stats);
+		int min = Utils.min(stats);
+		int avg = Utils.avg(stats);
 		System.out.println("max=" + max + " min=" + min + " avg=" + avg);
 	}
 	
@@ -351,13 +352,38 @@ public class Problem {
 	}
 	
 	public static void main(String[] args) {
-		String a = "SEND";
-		String b = "MORE";
-		String c = "MONEY";
+//		String a = "SEND";
+//		String b = "MORE";
+//		String c = "MONEY";
+//		
+//		Problem prob = new Problem(a,b,c);
+//
+//		prob.solve(200, 1000);
 		
-		Problem prob = new Problem(a,b,c);
+		Scanner reader = new Scanner(System.in);  
+		System.out.println("Enter the first word: ");
+		String word1 = reader.nextLine();
+		System.out.println("Enter the math action: ");
+		String sign = reader.nextLine();
+		System.out.println("Enter the second word: ");
+		String word2 = reader.nextLine();
+		System.out.println("Enter the result: ");
+		String target = reader.nextLine();
+		
+		System.out.println("Enter number of genrations: ");
+		int genration = reader.nextInt();
+			
+		System.out.println("Enter number of solutions in each genration: ");
+		int sol_number = reader.nextInt();
+		
+		Problem prob2 = new Problem(word1.toUpperCase(),word2.toUpperCase(),target.toUpperCase(),sign);
 
-		prob.solve(200, 1000);
+		String res = prob2.solve(sol_number, genration);
+		
+		if (res == ""){
+			System.out.println("couldn't find solution after " + genration + " iterations");
+		}
+				
 		
 	}
 

@@ -58,6 +58,34 @@ public class Utils {
 	public static String swap(String str, char char1, char char2) {
 		return str.replace(char1, char2);
 	}
+	
+	public static int min(int[] array){
+		int min = 100;
+		for(int i=0;i<array.length;i++){
+			if (array[i] < min){
+				min = array[i];
+			}
+		}
+		return min;
+	}
+	
+	public static int max(int[] array){
+		int max = 0;
+		for(int i=0;i<array.length;i++){
+			if (array[i] > max){
+				max = array[i];
+			}
+		}
+		return max;
+	}
+	
+	public static int avg(int[] array){
+		int avg = 0;
+		for(int i=0;i<array.length;i++){
+			avg = avg + array[i];
+		}
+		return avg/array.length;
+	}
 
 
 }
