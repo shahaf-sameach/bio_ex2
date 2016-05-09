@@ -15,7 +15,7 @@ public class test {
 		String b = "MORE";
 		String c = "MONEY";
 		String[] sol_arry = new String[100];
-		Solution sol = new Solution(a,b,c);
+		Problem sol = new Problem(a,b,c);
 		for(int i=0;i<10;i++){
 			System.out.println(sol.generate());
 		}

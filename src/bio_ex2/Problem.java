@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Random;
 
 
-public class Solution {
+public class Problem {
 	
 	private String word1;
 	private String word2;
@@ -18,11 +18,11 @@ public class Solution {
 	private Random rand = new Random();
 	private Utils util = new Utils();
 	
-	public Solution(String word1, String word2, String target){
+	public Problem(String word1, String word2, String target){
 		this(word1 ,word2 ,target ,"+");
 	}
 	
-	public Solution(String word1, String word2, String target, String sign){
+	public Problem(String word1, String word2, String target, String sign){
 		this.word1 = word1;
 		this.word2 = word2;
 		this.target = target;
@@ -197,8 +197,8 @@ public class Solution {
 		}
 		
 		while (valid_str.charAt(0) == '0'){
-			char char1 = util.getRandomChar(valid_str);
-			valid_str = util.swap(valid_str, '0', char1);
+			char char1 = Utils.getRandomChar(valid_str);
+			valid_str = Utils.swap(valid_str, '0', char1);
 		}
 			
 		return valid_str;
@@ -252,8 +252,10 @@ public class Solution {
 		for(int i = 0;i<solutions.length;i++){
 			stats[i] = fitness(solutions[i]);
 		}
-		
-		System.out.println("max=" + "" + "min=" + "" + "avg=" + "");
+		int max = 0;
+		int min = 0;
+		int avg = 0;
+		System.out.println("max=" + max + " min=" + min + " avg=" + avg);
 	}
 	
 	//return solution-fitness score map
@@ -353,10 +355,9 @@ public class Solution {
 		String b = "MORE";
 		String c = "MONEY";
 		
-		Solution sol = new Solution(a,b,c);
-		System.out.println(sol.isCorrect("95671085"));
+		Problem prob = new Problem(a,b,c);
 
-		sol.solve(200, 1000);
+		prob.solve(200, 1000);
 		
 	}
 
