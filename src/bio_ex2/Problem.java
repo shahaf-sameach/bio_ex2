@@ -276,24 +276,24 @@ public class Problem {
 	}
 	
 	private String[] stepGeneration(String[] solutions, String[] occurnce){
-		//copy the best solution to the next generation
+		//copy the best solution to the next generation (elitisem) 
 		solutions[0] = max_solution;
 		
 		for(int i=1;i<solutions.length;i++){
 			int rnd = rand.nextInt(100);
-			// with 0.15 prob create a new random solution (avoid local minimum)
-			if (rnd < 15){
+			// with 0.2 prob create a new random solution (avoid local minimum)
+			if (rnd < 20){
 				solutions[i] = generate();
 			}
 			else {
 				String str1 = (String) Utils.rand(occurnce);
 				String str2 = (String) Utils.rand(occurnce);
 				solutions[i] = revalidate(crossOver(str1, str2));
-			}
-			
-			//mutate 5% of the new solutions
-			if (rand.nextInt(100) < 5){
-				solutions[i] = mutate(solutions[i]);
+				
+				//mutate 20% of the new solutions
+				if (rand.nextInt(100) < 20){
+					solutions[i] = mutate(solutions[i]);
+				}
 			}
 		}
 		return solutions;
@@ -352,37 +352,37 @@ public class Problem {
 	}
 	
 	public static void main(String[] args) {
-//		String a = "SEND";
-//		String b = "MORE";
-//		String c = "MONEY";
-//		
-//		Problem prob = new Problem(a,b,c);
-//
-//		prob.solve(200, 1000);
+		String a = "SEND";
+		String b = "MORE";
+		String c = "MONEY";
 		
-		Scanner reader = new Scanner(System.in);  
-		System.out.println("Enter the first word: ");
-		String word1 = reader.nextLine();
-		System.out.println("Enter the math action: ");
-		String sign = reader.nextLine();
-		System.out.println("Enter the second word: ");
-		String word2 = reader.nextLine();
-		System.out.println("Enter the result: ");
-		String target = reader.nextLine();
-		
-		System.out.println("Enter number of genrations: ");
-		int genration = reader.nextInt();
-			
-		System.out.println("Enter number of solutions in each genration: ");
-		int sol_number = reader.nextInt();
-		
-		Problem prob2 = new Problem(word1.toUpperCase(),word2.toUpperCase(),target.toUpperCase(),sign);
+		Problem prob = new Problem(a,b,c);
 
-		String res = prob2.solve(sol_number, genration);
+		prob.solve(200, 1000);
 		
-		if (res == ""){
-			System.out.println("couldn't find solution after " + genration + " iterations");
-		}
+//		Scanner reader = new Scanner(System.in);  
+//		System.out.println("Enter the first word: ");
+//		String word1 = reader.nextLine();
+//		System.out.println("Enter the math action: ");
+//		String sign = reader.nextLine();
+//		System.out.println("Enter the second word: ");
+//		String word2 = reader.nextLine();
+//		System.out.println("Enter the result: ");
+//		String target = reader.nextLine();
+//		
+//		System.out.println("Enter number of genrations: ");
+//		int genration = reader.nextInt();
+//			
+//		System.out.println("Enter number of solutions in each genration: ");
+//		int sol_number = reader.nextInt();
+//		
+//		Problem prob2 = new Problem(word1.toUpperCase(),word2.toUpperCase(),target.toUpperCase(),sign);
+//
+//		String res = prob2.solve(sol_number, genration);
+//		
+//		if (res == ""){
+//			System.out.println("couldn't find solution after " + genration + " iterations");
+//		}
 				
 		
 	}
