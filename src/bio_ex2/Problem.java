@@ -46,7 +46,8 @@ public class Problem {
 		for(int i = 0; i < possible_sol.length(); i++)
 		{
 			int rnd = rand.nextInt(numbers.length());
-			if (i == 0)
+			//first char of each word cannot be zero
+			if ((i == 0) || (i == word1.length()))
 				rnd = rand.nextInt(numbers.length() - 1) + 1;
 			
 			if (!(Utils.isNumeric(possible_sol.charAt(i))))
@@ -134,6 +135,10 @@ public class Problem {
 		if (target_comp.length() != target.length())
 			return false;
 		
+		if (!isMathValid(sol)){
+			return false;
+		}
+		
 		int same_char_count=0;
 		for(int i = 0;i<target_comp.length();i++){
 			if (!Utils.isNumeric(target_comp.charAt(i))){
@@ -147,7 +152,20 @@ public class Problem {
 		
 		if (same_char_count == sameCharsNum())
 			return true;
+		
 		return false;
+	}
+	
+	private boolean isMathValid(String str){
+		int num1 = Integer.parseInt(str.substring(0, word1.length()));
+		int num2 = Integer.parseInt(str.substring(word1.length(), str.length()));
+		if ((sign == "-") && (num1 < num2)){
+			return false;
+		}
+		if ((sign == "/") && ((num1 % num2) != 0)){
+			return false;
+		}
+		return true;
 	}
 	
 	//calc the equation result of a possible solution
@@ -156,7 +174,7 @@ public class Problem {
 		int num2 = Integer.parseInt(eq.substring(word1.length(), eq.length()));
 		int result;
 		if (sign == "*"){
-			result = num1 + num2;
+			result = num1 * num2;
 		} else if (sign == "-"){
 			result = num1 - num2;
 		} else if (sign == "/"){
@@ -178,8 +196,21 @@ public class Problem {
 		return map;
 	}
 	
-	//convert solution to valid solution 
+	//revalidate till each word don't start at 0
 	public String revalidate(String num){
+		char first_char_word1;
+		char first_char_word2;
+		do {
+			first_char_word1 = num.charAt(0);
+			first_char_word2 = num.charAt(word1.length());
+			num = revalidateString(num);
+		} while ((first_char_word1 != '0') && (first_char_word2 != '0'));
+		System.out.println("num="+num);
+		return num;
+	}
+	
+	//convert solution to valid solution 
+	public String revalidateString(String num){
 		Map<Character,Character> map = getCharMap(num); 
 		String valid_str = "";
 
@@ -262,7 +293,7 @@ public class Problem {
 	//return solution-fitness score map
 	private Map<String,Integer> getFitnessMap(String[] solutions){
 		Map<String,Integer> fitness_map = new HashMap<String,Integer>();
-		
+
 		String sol;
 		int score = 0;
 		for (int i=0;i<solutions.length;i++){
@@ -352,11 +383,11 @@ public class Problem {
 	}
 	
 	public static void main(String[] args) {
-		String a = "SEND";
-		String b = "MORE";
-		String c = "MONEY";
+		String a = "BBB";
+		String b = "AAA";
+		String c = "B";
 		
-		Problem prob = new Problem(a,b,c);
+		Problem prob = new Problem(a,b,c, "/");
 
 		prob.solve(200, 1000);
 		
