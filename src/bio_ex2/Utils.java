@@ -36,7 +36,6 @@ public class Utils {
 		do {
 			char1 = getRandomChar(str);
 			char2 = getRandomChar(str);
-			System.out.println("char1=" + char1 + " char2=" + char2);
 		} while (char1 == char2);
 		return  str.replace(char1, '-').replace(char2, '+').replace('-', char2).replace('+', char1);
 	}

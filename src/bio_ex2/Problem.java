@@ -95,7 +95,7 @@ public class Problem {
 		int min_len =  Math.min(opt_sol.length(), result.length());
 		for(int i=0; i<min_len; i++){
 			if (Utils.isNumeric(opt_sol.charAt(i)))
-				if (opt_sol.charAt(i) == result.charAt(i)) 
+				if ((opt_sol.charAt(i) == result.charAt(i)) && (target.charAt(i)==words.charAt(sol.indexOf(opt_sol.charAt(i)))))
 					score++;
 		}
 		
@@ -178,7 +178,11 @@ public class Problem {
 		} else if (sign == "-"){
 			result = num1 - num2;
 		} else if (sign == "/"){
-			result = num1 / num2;
+			if (num2 == 0) {
+				result = (10 * target.length() + 1);
+			} else {
+				result = num1 / num2;
+			}
 		} else{
 			result = num1 + num2;
 		}
@@ -205,7 +209,7 @@ public class Problem {
 			first_char_word2 = num.charAt(word1.length());
 			num = revalidateString(num);
 		} while ((first_char_word1 != '0') && (first_char_word2 != '0'));
-		System.out.println("num="+num);
+		
 		return num;
 	}
 	
@@ -319,7 +323,7 @@ public class Problem {
 			else {
 				String str1 = (String) Utils.rand(occurnce);
 				String str2 = (String) Utils.rand(occurnce);
-				solutions[i] = revalidate(crossOver(str1, str2));
+				solutions[i] = revalidateString(crossOver(str1, str2));
 				
 				//mutate 20% of the new solutions
 				if (rand.nextInt(100) < 20){
@@ -373,9 +377,14 @@ public class Problem {
 	private String mutate(String str){
 		String exclud_numbers = Utils.getExcludeNumbers(str);
 		if (exclud_numbers.length() > 0){
-			char char1 = Utils.getRandomChar(str);
-			char char2 = Utils.getRandomChar(exclud_numbers);
-			str = Utils.swap(str, char1, char2);
+			if (rand.nextInt(10) < 5) {
+				char char1 = Utils.getRandomChar(str);
+				char char2 = Utils.getRandomChar(exclud_numbers);
+				str = Utils.swap(str, char1, char2);
+			}
+			else {
+				str = Utils.swap(str);
+			}
 		} else{
 			str = Utils.swap(str);
 		}
@@ -383,9 +392,9 @@ public class Problem {
 	}
 	
 	public static void main(String[] args) {
-		String a = "BBB";
-		String b = "AAA";
-		String c = "B";
+		String a = "AAA";
+		String b = "BBB";
+		String c = "BCF";
 		
 		Problem prob = new Problem(a,b,c, "/");
 
