@@ -84,6 +84,10 @@ public class Problem {
 		
 		//calc score as weighted scores of similar and diff
 		int total_score = (int)((0.8*same_char_score + 0.2*len_score) * 100);
+		
+		if (!isCorrect(sol))
+			total_score--;
+		
 		return total_score;
 	}
 	
@@ -315,9 +319,8 @@ public class Problem {
 		solutions[0] = max_solution;
 		
 		for(int i=1;i<solutions.length;i++){
-			int rnd = rand.nextInt(100);
 			// with 0.2 prob create a new random solution (avoid local minimum)
-			if (rnd < 20){
+			if (rand.nextInt(100) < 20){
 				solutions[i] = generate();
 			}
 			else {
@@ -392,11 +395,11 @@ public class Problem {
 	}
 	
 	public static void main(String[] args) {
-		String a = "AAA";
-		String b = "BBB";
-		String c = "BCF";
+		String a = "SEND";
+		String b = "MORE";
+		String c = "MONEY";
 		
-		Problem prob = new Problem(a,b,c, "/");
+		Problem prob = new Problem(a,b,c, "+");
 
 		prob.solve(200, 1000);
 		
