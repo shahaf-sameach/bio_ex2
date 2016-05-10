@@ -98,9 +98,12 @@ public class Problem {
 		String opt_sol = wordToNum(sol);
 		int min_len =  Math.min(opt_sol.length(), result.length());
 		for(int i=0; i<min_len; i++){
-			if (Utils.isNumeric(opt_sol.charAt(i)))
-				if ((opt_sol.charAt(i) == result.charAt(i)) && (target.charAt(i)==words.charAt(sol.indexOf(opt_sol.charAt(i)))))
+			// the char is numeric
+			if (Utils.isNumeric(opt_sol.charAt(i))){
+				// chars are the same and also the same on the letter target and source (words) 
+				if (opt_sol.charAt(i) == result.charAt(i))
 					score++;
+			}
 		}
 		
 		return (double)score/(double)sameCharsNum();
@@ -267,20 +270,15 @@ public class Problem {
 			//check to see if there is a correct solution
 			for (String sol : solutions){
 				if (isCorrect(sol)){
-					System.out.println("valid solution = " + sol);
-					System.out.println(getSolution(sol));
 					return sol;
 				}
 			}
 			
 			fitness_map = getFitnessMap(solutions);
 			calcStats(solutions);
-//			System.out.println("max=(" + max_solution + "," + max_score + ")");
-//			System.out.println(fitness_map.size());
-			
+	
 			String[] occurnce_array = getOccurnessArray(fitness_map);
-//			System.out.println("occurnce_array size=" + occurnce_array.length);
-			
+		
 			solutions = stepGeneration(solutions, occurnce_array);
 				
 		}
@@ -319,8 +317,8 @@ public class Problem {
 		solutions[0] = max_solution;
 		
 		for(int i=1;i<solutions.length;i++){
-			// with 0.2 prob create a new random solution (avoid local minimum)
-			if (rand.nextInt(100) < 20){
+			// with 0.1 prob create a new random solution (avoid local minimum)
+			if (rand.nextInt(100) < 10){
 				solutions[i] = generate();
 			}
 			else {
@@ -401,7 +399,13 @@ public class Problem {
 		
 		Problem prob = new Problem(a,b,c, "+");
 
-		prob.solve(200, 1000);
+		String sol = prob.solve(200, 1000);
+		if (sol != "") {
+			System.out.println("sol=" + sol);
+			System.out.println(prob.getSolution(sol));
+		}
+		
+		
 		
 //		Scanner reader = new Scanner(System.in);  
 //		System.out.println("Enter the first word: ");
@@ -419,13 +423,16 @@ public class Problem {
 //		System.out.println("Enter number of solutions in each genration: ");
 //		int sol_number = reader.nextInt();
 //		
-//		Problem prob2 = new Problem(word1.toUpperCase(),word2.toUpperCase(),target.toUpperCase(),sign);
+//		Problem prob = new Problem(word1.toUpperCase(),word2.toUpperCase(),target.toUpperCase(),sign);
 //
 //		String res = prob2.solve(sol_number, genration);
 //		
 //		if (res == ""){
 //			System.out.println("couldn't find solution after " + genration + " iterations");
+//		} else {
+//			System.out.println("found valid solution=" + res + ", " + prob.getSolution(res));
 //		}
+		
 				
 		
 	}
