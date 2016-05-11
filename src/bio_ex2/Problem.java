@@ -279,7 +279,7 @@ public class Problem {
 	
 			String[] occurnce_array = getOccurnessArray(fitness_map);
 		
-			solutions = stepGeneration(solutions, occurnce_array);
+			solutions = stepGeneration(solutions, occurnce_array, fitness_map);
 				
 		}
 		return "";
@@ -312,11 +312,19 @@ public class Problem {
 		return fitness_map;
 	}
 	
-	private String[] stepGeneration(String[] solutions, String[] occurnce){
-		//copy the best solution to the next generation (elitisem) 
-		solutions[0] = max_solution;
+	private String[] stepGeneration(String[] solutions, String[] occurnce, Map<String,Integer> fitness_map){ 
+		Map<String,Integer> sorted_fitness_map = Utils.sortByValue(fitness_map);
 		
-		for(int i=1;i<solutions.length;i++){
+		int i=0;
+		//copy the best 10% solutions to the next generation (elitisem)
+		for (Map.Entry<String, Integer> entry : sorted_fitness_map.entrySet()){
+			solutions[i] = entry.getKey();
+			if (i > sorted_fitness_map.size()/10)
+				break;
+			i++;
+		}
+
+		for(;i<solutions.length;i++){
 			// with 0.1 prob create a new random solution (avoid local minimum)
 			if (rand.nextInt(100) < 10){
 				solutions[i] = generate();
@@ -327,7 +335,7 @@ public class Problem {
 				solutions[i] = revalidateString(crossOver(str1, str2));
 				
 				//mutate 20% of the new solutions
-				if (rand.nextInt(100) < 20){
+				if (rand.nextInt(100) < 15){
 					solutions[i] = mutate(solutions[i]);
 				}
 			}
