@@ -3,8 +3,8 @@ Gentic algoritm implementation to solve the "number riddle"
 
 
 ```
-ABA +
-BAB
+SEND +
+MORE
 ----
-FGF
+MONEY
 ```
